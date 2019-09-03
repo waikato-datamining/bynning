@@ -15,3 +15,14 @@ class Binnable(Generic[KeyType]):
         a bin.
         """
         pass
+
+    @staticmethod
+    def get_bin_key_static(binnable: 'Binnable[KeyType]') -> KeyType:
+        """
+        Static accessor of the binnable's get_bin_key method (for
+        sorting routines).
+
+        :param binnable:    The binnable to get the bin key from.
+        :return:            The bin key.
+        """
+        return binnable.get_bin_key()
