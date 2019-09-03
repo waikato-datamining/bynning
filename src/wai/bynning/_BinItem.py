@@ -2,7 +2,7 @@ from typing import Generic, Iterator, Iterable, TypeVar
 
 from ._typing import KeyType
 from ._Binnable import Binnable
-from ._Extractor import Extractor
+from .extract import Extractor
 
 PayloadType = TypeVar("PayloadType")  # The type of the payload of the bin-item (generally non-binnable)
 

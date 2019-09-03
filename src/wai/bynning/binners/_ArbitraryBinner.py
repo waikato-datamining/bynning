@@ -1,7 +1,7 @@
 from .._Binnable import Binnable
 from ._Binner import Binner
 from .._typing import KeyType, LabelType
-from .._Extractor import Extractor
+from ..extract import Extractor
 
 
 class ArbitraryBinner(Binner[KeyType, LabelType]):
