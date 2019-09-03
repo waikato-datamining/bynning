@@ -60,14 +60,20 @@ class Bin(Binnable[LabelType], Generic[ItemType, LabelType]):
         """
         self.__items.sort(key=Binnable.get_bin_key_static, reverse=reverse)
 
-    def delayer(self) -> None:
+    def delayer(self) -> bool:
         """
         Removes one layer of wrapping from this bin.
+
+        :return:    Whether delayering was possible.
         """
         if self.items_are_bins():
             self.__items = list(chain(*self))
         elif self.items_are_wrapped():
             self.__items = list(map(BinItem.payload, self))
+        else:
+            return False
+
+        return True
 
     def __contains__(self, item: Union[ItemType, KeyType]) -> bool:
         """
