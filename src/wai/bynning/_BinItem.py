@@ -9,7 +9,9 @@ PayloadType = TypeVar("PayloadType")  # The type of the payload of the bin-item 
 
 class BinItem(Binnable[KeyType], Generic[KeyType, PayloadType]):
     """
-    Wrapper class for objects which makes them binnable.
+    Wrapper class for objects which makes them binnable. Also provides the capability
+    of respecifying the bin-key of another binnable, by wrapping it in this class with
+    an extractor.
     """
     def __init__(self, key: KeyType, item: PayloadType):
         self._key: KeyType = key
