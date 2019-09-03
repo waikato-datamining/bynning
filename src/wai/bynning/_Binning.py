@@ -1,11 +1,13 @@
 from collections import OrderedDict
 from itertools import chain
-from typing import Generic, Iterator, Union, Iterable, Optional
+from typing import Generic, Iterator, Union, Iterable, Optional, overload, TypeVar
 
 from ._Binnable import Binnable
 from ._Bin import Bin
 from .binners import Binner
 from ._typing import KeyType, ItemType, LabelType
+
+NewLabelType = TypeVar("NewLabelType")  # Type of label after rebinning
 
 
 class Binning(Generic[KeyType, LabelType, ItemType]):
@@ -40,29 +42,30 @@ class Binning(Generic[KeyType, LabelType, ItemType]):
             # Add the item to the correct bin
             self._bins[label].add(item)
 
+    @overload
     def rebin(self,
-              binner: Binner[KeyType, LabelType],
-              in_place: bool = False) -> 'Binning[KeyType, LabelType, ItemType]':
+              binner: Binner[KeyType, NewLabelType],
+              against_bins: bool) -> 'Binning[KeyType, NewLabelType, ItemType]':
+        pass
+
+    @overload
+    def rebin(self,
+              binner: Binner[LabelType, NewLabelType],
+              against_bins: bool) -> 'Binning[LabelType, NewLabelType, Bin[LabelType, KeyType]]':
+        pass
+
+    def rebin(self,
+              binner,
+              against_bins=False):
         """
         Rebins the items in this binning using a new binner.
 
-        :param binner:      The binner to use.
-        :param in_place:    Whether the re-binning should overwrite this one or
-                            return a new binning.
-        :return:            The new binning.
+        :param binner:          The binner to use.
+        :param against_bins:    Whether the given binner should be applied to the bins themselves
+                                (grouped binning). Defaults to False (against items).
+        :return:                The new binning.
         """
-        # Create a new binning using the given binner
-        new_binning = Binning(binner, self.bin_item_iterator())
-
-        # If this is not an in-place rebinning, return the new binning
-        if not in_place:
-            return new_binning
-
-        # Otherwise overwrite our state with that of the new binning
-        self._binner = new_binning._binner
-        self._bins = new_binning._bins
-
-        return self
+        return Binning(binner, self if against_bins else self.item_iterator())
 
     def __contains__(self, item: Union[Binnable[KeyType], KeyType]) -> bool:
         return any(item in bin for bin in self)
@@ -70,7 +73,7 @@ class Binning(Generic[KeyType, LabelType, ItemType]):
     def __iter__(self) -> Iterator[Bin[LabelType, ItemType]]:
         return iter(self._bins.values())
 
-    def bin_item_iterator(self) -> Iterator[Binnable[KeyType]]:
+    def item_iterator(self) -> Iterator[Binnable[KeyType]]:
         """
         Returns an iterator over the items in the bins.
         """
@@ -79,7 +82,7 @@ class Binning(Generic[KeyType, LabelType, ItemType]):
     def __getitem__(self, item: LabelType) -> Bin[LabelType, ItemType]:
         return self._bins[item]
 
-    def get_bin_item(self, index: int) -> Binnable[KeyType]:
+    def get_item(self, index: int) -> Binnable[KeyType]:
         """
         Gets the indexed item from amongst all the items in the bins.
 
