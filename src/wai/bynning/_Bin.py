@@ -10,9 +10,13 @@ class Bin(Binnable[LabelType], Generic[ItemType, LabelType]):
     """
     def __init__(self, label: LabelType, items: Optional[Iterable[ItemType]] = None):
         self.__label: LabelType = label
-        self.__items: List[Binnable[KeyType]] = list(items) if items is not None else []
+        self.__items: List[ItemType] = list(items) if items is not None else []
 
     def get_bin_key(self) -> LabelType:
+        """
+        Gets the bin-key for binning this bin, which is
+        the label.
+        """
         return self.label()
 
     def label(self) -> LabelType:
@@ -55,6 +59,13 @@ class Bin(Binnable[LabelType], Generic[ItemType, LabelType]):
         self.__items.sort(key=Binnable.get_bin_key_static, reverse=reverse)
 
     def __contains__(self, item: Union[ItemType, KeyType]) -> bool:
+        """
+        Checks if a given item is in this bin.
+
+        :param item:    The item, or a bin-key.
+        :return:        True if the item (or an item with the given key) is in
+                        this bin, False if not.
+        """
         if isinstance(item, Binnable):
             return item in self.__items
         else:
@@ -78,6 +89,12 @@ class Bin(Binnable[LabelType], Generic[ItemType, LabelType]):
                 yield item
 
     def __getitem__(self, index: int) -> ItemType:
+        """
+        Gets an item from this bin by index.
+
+        :param index:   The positional index of the item to get.
+        :return:        The item.
+        """
         return self.__items[index]
 
     def get_items_by_key(self, key: KeyType) -> List[ItemType]:
@@ -91,4 +108,7 @@ class Bin(Binnable[LabelType], Generic[ItemType, LabelType]):
         return [item for item in self if item.get_bin_key() == key]
 
     def __len__(self) -> int:
+        """
+        Gets the number of items in this bin.
+        """
         return len(self.__items)
