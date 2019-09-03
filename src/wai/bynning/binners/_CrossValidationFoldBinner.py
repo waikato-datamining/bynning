@@ -7,10 +7,6 @@ from .._typing import LabelType
 from .._typing import KeyType
 from ._ConfiguredBinner import ConfiguredBinner
 
-# The bin labels for the train and test data
-TRAIN_BIN_LABEL: str = "train"
-TEST_BIN_LABEL: str = "test"
-
 
 class CrossValidationFoldBinner(ConfiguredBinner[KeyType, str]):
     """
