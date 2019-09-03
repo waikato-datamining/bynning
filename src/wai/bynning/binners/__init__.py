@@ -1,3 +1,4 @@
+from ._ArbitraryBinner import ArbitraryBinner
 from ._Binner import Binner
 from ._ConfiguredBinner import ConfiguredBinner
 from ._CrossValidationFoldBinner import CrossValidationFoldBinner

@@ -4,7 +4,7 @@ from .._typing import KeyType, LabelType
 from .._Extractor import Extractor
 
 
-class GroupingBinner(Binner[KeyType, LabelType]):
+class ArbitraryBinner(Binner[KeyType, LabelType]):
     """
     Binner which bins items into arbitrary groups using an extractor.
     """
