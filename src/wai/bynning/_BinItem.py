@@ -26,6 +26,13 @@ class BinItem(Binnable[KeyType], Generic[KeyType, PayloadType]):
         """
         return self._payload
 
+    def payload_is_binnable(self) -> bool:
+        """
+        Checks if the payload of this bin-item is binnable (i.e. this
+        bin-item is being used to modify the bin-key of the payload).
+        """
+        return isinstance(self._payload, Binnable)
+
     def __str__(self) -> str:
         return str(self._key) + ":" + str(self._payload)
 
