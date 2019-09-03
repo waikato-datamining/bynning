@@ -2,7 +2,6 @@ from collections import OrderedDict
 from itertools import chain
 from typing import Generic, Iterator, Union, Iterable, Optional, overload, TypeVar
 
-from ._Binnable import Binnable
 from ._Bin import Bin
 from .binners import Binner
 from ._typing import KeyType, ItemType, LabelType
@@ -10,13 +9,13 @@ from ._typing import KeyType, ItemType, LabelType
 NewLabelType = TypeVar("NewLabelType")  # Type of label after rebinning
 
 
-class Binning(Generic[KeyType, LabelType, ItemType]):
+class Binning(Generic[ItemType, LabelType]):
     """
     Class representing a binning of a set of items into bins.
     """
-    def __init__(self, binner: Binner[KeyType, LabelType], items: Optional[Iterable[Binnable[KeyType]]] = None):
+    def __init__(self, binner: Binner[KeyType, LabelType], items: Optional[Iterable[ItemType]] = None):
         self._binner: Binner[KeyType, LabelType] = binner
-        self._bins: OrderedDict[LabelType, Bin[LabelType, ItemType]] = OrderedDict()
+        self._bins: OrderedDict[LabelType, Bin[ItemType, LabelType]] = OrderedDict()
 
         # Bin any initial items
         if items is not None:
@@ -28,7 +27,7 @@ class Binning(Generic[KeyType, LabelType, ItemType]):
         """
         return self._binner
 
-    def bin(self, items: Iterable[Binnable[KeyType]]):
+    def bin(self, items: Iterable[ItemType]):
         """
         Adds the given items to the bins in this binning.
 
@@ -37,7 +36,7 @@ class Binning(Generic[KeyType, LabelType, ItemType]):
         for item, label in self._binner.bin_all(items):
             # Create a new bin if we have a new label
             if label not in self._bins:
-                self._bins[label] = Bin[LabelType, ItemType](label)
+                self._bins[label] = Bin[ItemType, LabelType](label)
 
             # Add the item to the correct bin
             self._bins[label].add(item)
@@ -45,13 +44,13 @@ class Binning(Generic[KeyType, LabelType, ItemType]):
     @overload
     def rebin(self,
               binner: Binner[KeyType, NewLabelType],
-              against_bins: bool) -> 'Binning[KeyType, NewLabelType, ItemType]':
+              against_bins: bool) -> 'Binning[ItemType, NewLabelType]':
         pass
 
     @overload
     def rebin(self,
               binner: Binner[LabelType, NewLabelType],
-              against_bins: bool) -> 'Binning[LabelType, NewLabelType, Bin[LabelType, KeyType]]':
+              against_bins: bool) -> 'Binning[Bin[ItemType, LabelType], NewLabelType]':
         pass
 
     def rebin(self,
@@ -67,22 +66,59 @@ class Binning(Generic[KeyType, LabelType, ItemType]):
         """
         return Binning(binner, self if against_bins else self.item_iterator())
 
-    def __contains__(self, item: Union[Binnable[KeyType], KeyType]) -> bool:
+    def __contains__(self, item: Union[Bin[ItemType, LabelType], LabelType]) -> bool:
+        """
+        Whether the given bin is in this binning.
+
+        :param item:    The bin itself, or its label.
+        :return:        True if the bin is in this binning,
+                        False if not.
+        """
+        if isinstance(bin, Bin):
+            return item in self._bins.values()
+        else:
+            return item in self._bins.keys()
+
+    def contains_item(self, item: Union[ItemType, KeyType]) -> bool:
+        """
+        Whether the given item is in any of the bins in this binning.
+
+        :param item:    The item, or its bin-key.
+        :return:        True if the item is in this binning,
+                        False if not.
+        """
         return any(item in bin for bin in self)
 
-    def __iter__(self) -> Iterator[Bin[LabelType, ItemType]]:
+    def __iter__(self) -> Iterator[Bin[ItemType, LabelType]]:
+        """
+        Returns an iterator over the bins in this binning.
+        """
         return iter(self._bins.values())
 
-    def item_iterator(self) -> Iterator[Binnable[KeyType]]:
+    def item_iterator(self) -> Iterator[ItemType]:
         """
-        Returns an iterator over the items in the bins.
+        Returns an iterator over the items in the bins in this binning.
         """
         return chain(*self)
 
-    def __getitem__(self, item: LabelType) -> Bin[LabelType, ItemType]:
+    def ungrouping_iterator(self) -> Iterator:
+        """
+        Returns an iterator over the most-deeply-nested items in this binning
+        (for grouped binning where bins may contain bins). Also unpacks
+        bin-item wrappers.
+        """
+        return chain(*(bin.ungrouping_iterator() for bin in self))
+
+    def __getitem__(self, item: LabelType) -> Bin[ItemType, LabelType]:
+        """
+        Gets the bin with the given label.
+
+        :param item:    The bin label.
+        :return:        The bin.
+        """
         return self._bins[item]
 
-    def get_item(self, index: int) -> Binnable[KeyType]:
+    def get_item(self, index: int) -> ItemType:
         """
         Gets the indexed item from amongst all the items in the bins.
 
@@ -101,6 +137,9 @@ class Binning(Generic[KeyType, LabelType, ItemType]):
                 index -= len(bin)
 
     def __len__(self) -> int:
+        """
+        Gets the number of bins in this binning.
+        """
         return len(self._bins)
 
     def total_num_items(self) -> int:

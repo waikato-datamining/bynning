@@ -5,9 +5,9 @@ from .._Binning import Binning
 from .._typing import LabelType, ItemType
 
 
-class BinningPostProcessor(Generic[LabelType, ItemType]):
+class BinningPostProcessor(Generic[ItemType, LabelType]):
     @abstractmethod
-    def post_process_binning(self, binning: Binning[LabelType, ItemType]) -> Binning[LabelType, ItemType]:
+    def post_process_binning(self, binning: Binning[ItemType, LabelType]) -> Binning[ItemType, LabelType]:
         """
         Applies the post-processing of this scheme to the
         given binning.

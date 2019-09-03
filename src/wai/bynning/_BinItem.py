@@ -1,22 +1,24 @@
-from typing import Generic, Iterator, Iterable
+from typing import Generic, Iterator, Iterable, TypeVar
 
-from ._typing import KeyType, ItemType
+from ._typing import KeyType
 from ._Binnable import Binnable
 from ._Extractor import Extractor
 
+PayloadType = TypeVar("PayloadType")  # The type of the payload of the bin-item (generally non-binnable)
 
-class BinItem(Binnable[KeyType], Generic[KeyType, ItemType]):
+
+class BinItem(Binnable[KeyType], Generic[KeyType, PayloadType]):
     """
     Wrapper class for objects which makes them binnable.
     """
-    def __init__(self, key: KeyType, item: ItemType):
+    def __init__(self, key: KeyType, item: PayloadType):
         self._key: KeyType = key
-        self._payload: ItemType = item
+        self._payload: PayloadType = item
 
     def get_bin_key(self) -> KeyType:
         return self._key
 
-    def payload(self) -> ItemType:
+    def payload(self) -> PayloadType:
         """
         Gets the item that is the payload for this bin item.
         """
@@ -26,8 +28,8 @@ class BinItem(Binnable[KeyType], Generic[KeyType, ItemType]):
         return str(self._key) + ":" + str(self._payload)
 
     @staticmethod
-    def extract_from(extractor: Extractor[ItemType, KeyType], items: Iterable[ItemType]) \
-            -> Iterator['BinItem[KeyType, ItemType]']:
+    def extract_from(extractor: Extractor[PayloadType, KeyType], items: Iterable[PayloadType]) \
+            -> Iterator['BinItem[KeyType, PayloadType]']:
         """
         Extracts a bin-item from each given item using the given key-extractor.
 
