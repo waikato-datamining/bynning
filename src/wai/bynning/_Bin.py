@@ -1,5 +1,7 @@
+from itertools import chain
 from typing import Generic, List, Union, Iterator, Iterable, Optional
 
+from ._BinItem import BinItem
 from ._Binnable import Binnable
 from ._typing import LabelType, KeyType, ItemType
 
@@ -58,6 +60,15 @@ class Bin(Binnable[LabelType], Generic[ItemType, LabelType]):
         """
         self.__items.sort(key=Binnable.get_bin_key_static, reverse=reverse)
 
+    def delayer(self) -> None:
+        """
+        Removes one layer of wrapping from this bin.
+        """
+        if self.items_are_bins():
+            self.__items = list(chain(*self))
+        elif self.items_are_wrapped():
+            self.__items = list(map(BinItem.payload, self))
+
     def __contains__(self, item: Union[ItemType, KeyType]) -> bool:
         """
         Checks if a given item is in this bin.
@@ -112,3 +123,20 @@ class Bin(Binnable[LabelType], Generic[ItemType, LabelType]):
         Gets the number of items in this bin.
         """
         return len(self.__items)
+
+    def items_are_bins(self) -> bool:
+        """
+        Whether the items in this bin are themselves bins.
+        """
+        return len(self) > 0 and isinstance(self.__items[0], Bin)
+
+    def items_are_wrapped(self) -> bool:
+        """
+        Whether the items in this bin are wrapped by the BinItem class.
+        """
+        if len(self) > 0:
+            first = self.__items[0]
+            if isinstance(first, BinItem):
+                return first.payload_is_binnable()
+
+        return False
