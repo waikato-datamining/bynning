@@ -46,8 +46,9 @@ class MinSizeBinner(ConfiguredBinner[int, int]):
         self._last_index += 1
 
         # Move to the next allocation if we've filled the bin
-        if self._allocations[self._allocation] == self._last_index:
-            self._allocation += 1
+        if self._allocation < len(self._allocations):
+            if self._allocations[self._allocation] == self._last_index:
+                self._allocation += 1
 
         # Return the bin allocation for this item
         return self._allocation
