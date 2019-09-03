@@ -79,9 +79,9 @@ class CrossValidationFoldBinner(ConfiguredBinner[KeyType, str]):
 
         # Put the item in the test or train set
         if self.__test_start_index <= self.__last_index < self.__test_end_index:
-            return TEST_BIN_LABEL
+            return CrossValidationFoldBinner.TEST_BIN_LABEL
         else:
-            return TRAIN_BIN_LABEL
+            return CrossValidationFoldBinner.TRAIN_BIN_LABEL
 
     def __iter__(self):
         return self

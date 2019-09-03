@@ -1,6 +1,5 @@
 from typing import Generic, List, Union, Iterator, Iterable, Optional
 
-from ._BinItem import BinItem
 from ._Binnable import Binnable
 from ._typing import LabelType, KeyType, ItemType
 
