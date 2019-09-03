@@ -38,3 +38,13 @@ class BinItem(Binnable[KeyType], Generic[KeyType, PayloadType]):
         :return:            The bin-items.
         """
         return (BinItem(extractor.extract(item), item) for item in items)
+
+    @staticmethod
+    def unwrapping_iterator(wrapped_iterator: Iterator['BinItem[KeyType, PayloadType]']) \
+            -> Iterator[PayloadType]:
+        """
+        Returns an iterator over the payloads of the bin-items in the given iterator.
+
+        :param wrapped_iterator:    An iterator over bin-items.
+        """
+        return map(BinItem.payload, wrapped_iterator)

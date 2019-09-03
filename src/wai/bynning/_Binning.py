@@ -104,8 +104,7 @@ class Binning(Generic[ItemType, LabelType]):
     def ungrouping_iterator(self) -> Iterator:
         """
         Returns an iterator over the most-deeply-nested items in this binning
-        (for grouped binning where bins may contain bins). Also unpacks
-        bin-item wrappers.
+        (for grouped binning where bins may contain bins).
         """
         return chain(*(bin.ungrouping_iterator() for bin in self))
 
