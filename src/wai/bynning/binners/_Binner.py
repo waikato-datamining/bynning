@@ -26,6 +26,6 @@ class Binner(Generic[KeyType, LabelType]):
         Returns the bin labels for all the given items.
 
         :param items:   The items to bin.
-        :return:        An iterator over the respective bin-labels.
+        :return:        An iterator over the items and their respective bin-labels.
         """
         return ((item, self.bin(item)) for item in items)
