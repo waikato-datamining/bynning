@@ -7,6 +7,7 @@ from ._FreedmanDiaconisChoiceBinning import FreedmanDiaconisChoiceBinning
 from ._FrequencyBinner import FrequencyBinner
 from ._KeyBinner import KeyBinner
 from ._ManualBinner import ManualBinner
+from ._MinSizeBinner import MinSizeBinner
 from ._NoBinner import NoBinner
 from ._RandomBinner import RandomBinner
 from ._RiceRuleBinner import RiceRuleBinner
