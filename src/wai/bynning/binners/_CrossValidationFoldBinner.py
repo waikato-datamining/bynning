@@ -16,6 +16,10 @@ class CrossValidationFoldBinner(ConfiguredBinner[KeyType, str]):
     """
     Binner which creates train/test splits for cross validation.
     """
+    # The bin labels for the train and test data
+    TRAIN_BIN_LABEL: str = "train"
+    TEST_BIN_LABEL: str = "test"
+
     def __init__(self, num_folds: Optional[int] = None):
         # Must have at least 2 folds
         if num_folds < 2:
