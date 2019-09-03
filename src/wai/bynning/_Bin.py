@@ -94,17 +94,6 @@ class Bin(Binnable[LabelType], Generic[ItemType, LabelType]):
         """
         return iter(self.__items)
 
-    def ungrouping_iterator(self) -> Iterator:
-        """
-        Returns an iterator over the most-deeply-nested items in this bin
-        (for grouped binning where bins may contain bins).
-        """
-        for item in self:
-            if isinstance(item, Bin):
-                yield from item.ungrouping_iterator()
-            else:
-                yield item
-
     def __getitem__(self, index: int) -> ItemType:
         """
         Gets an item from this bin by index.

@@ -2,11 +2,14 @@ from collections import OrderedDict
 from itertools import chain
 from typing import Generic, Iterator, Union, Iterable, Optional, overload, TypeVar
 
+from ._BinItem import BinItem
+from .extract import Extractor
 from ._Bin import Bin
 from .binners import Binner
 from ._typing import KeyType, ItemType, LabelType
 
 NewLabelType = TypeVar("NewLabelType")  # Type of label after rebinning
+NewKeyType = TypeVar("NewKeyType")  # Type of new key when rebinning with extractor
 
 
 class Binning(Generic[ItemType, LabelType]):
@@ -41,30 +44,64 @@ class Binning(Generic[ItemType, LabelType]):
             # Add the item to the correct bin
             self._bins[label].add(item)
 
-    @overload
+    @overload  # for when extractor == None, against_bins == False
     def rebin(self,
               binner: Binner[KeyType, NewLabelType],
+              extractor: None,
               against_bins: bool) -> 'Binning[ItemType, NewLabelType]':
         pass
 
-    @overload
+    @overload  # for when extractor != None, against_bins == False
+    def rebin(self,
+              binner: Binner[NewKeyType, NewLabelType],
+              extractor: Extractor[ItemType, NewKeyType],
+              against_bins: bool) -> 'Binning[ItemType, NewLabelType]':
+        pass
+
+    @overload  # for when extractor == None, against_bins == True
     def rebin(self,
               binner: Binner[LabelType, NewLabelType],
-              against_bins: bool) -> 'Binning[Bin[ItemType, LabelType], NewLabelType]':
+              extractor: None,
+              against_bins: bool) -> 'Binning[ItemType, NewLabelType]':
+        pass
+
+    @overload  # for when extractor != None, against_bins == True
+    def rebin(self,
+              binner: Binner[NewKeyType, NewLabelType],
+              extractor: Extractor[Bin[ItemType, LabelType], NewKeyType],
+              against_bins: bool) -> 'Binning[ItemType, NewLabelType]':
         pass
 
     def rebin(self,
               binner,
+              extractor=None,
               against_bins=False):
         """
         Rebins the items in this binning using a new binner.
 
         :param binner:          The binner to use.
+        :param extractor:       An optional extractor to specify a new bin-key for the data.
         :param against_bins:    Whether the given binner should be applied to the bins themselves
                                 (grouped binning). Defaults to False (against items).
         :return:                The new binning.
         """
-        return Binning(binner, self if against_bins else self.item_iterator())
+        # Get the iterator to use (over items or bins)
+        iterator = self if against_bins else self.item_iterator()
+
+        # Wrap the items if using a new bin-key
+        if extractor is not None:
+            iterator = BinItem.extract_from(extractor, iterator)
+
+        # Create a new binning
+        new_binning = Binning(binner, iterator)
+
+        # Remove any added layers (bins, extractor-wrappers)
+        if against_bins:
+            new_binning.delayer()
+        if extractor is not None:
+            new_binning.delayer()
+
+        return new_binning
 
     def __contains__(self, item: Union[Bin[ItemType, LabelType], LabelType]) -> bool:
         """
@@ -100,13 +137,6 @@ class Binning(Generic[ItemType, LabelType]):
         Returns an iterator over the items in the bins in this binning.
         """
         return chain(*self)
-
-    def ungrouping_iterator(self) -> Iterator:
-        """
-        Returns an iterator over the most-deeply-nested items in this binning
-        (for grouped binning where bins may contain bins).
-        """
-        return chain(*(bin.ungrouping_iterator() for bin in self))
 
     def __getitem__(self, item: LabelType) -> Bin[ItemType, LabelType]:
         """
@@ -175,3 +205,10 @@ class Binning(Generic[ItemType, LabelType]):
         """
         for bin in self:
             bin.sort(reverse)
+
+    def delayer(self) -> None:
+        """
+        Delayers each bin in this binning.
+        """
+        for bin in self:
+            bin.delayer()
