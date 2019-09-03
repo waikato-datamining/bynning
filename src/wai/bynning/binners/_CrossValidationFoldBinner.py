@@ -18,7 +18,7 @@ class CrossValidationFoldBinner(ConfiguredBinner[KeyType, str]):
 
     def __init__(self, num_folds: Optional[int] = None):
         # Must have at least 2 folds
-        if num_folds < 2:
+        if num_folds is not None and num_folds < 2:
             raise ValueError(f"Must specify at least 2 folds, got {num_folds}")
 
         super().__init__()
