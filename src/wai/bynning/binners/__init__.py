@@ -7,6 +7,7 @@ from ._FrequencyBinner import FrequencyBinner
 from ._KeyBinner import KeyBinner
 from ._ManualBinner import ManualBinner
 from ._NoBinner import NoBinner
+from ._RandomBinner import RandomBinner
 from ._RiceRuleBinner import RiceRuleBinner
 from ._ScottsNormalReferenceRuleBinner import ScottsNormalReferenceRuleBinner
 from ._SquareRootChoiceBinner import SquareRootChoiceBinner
