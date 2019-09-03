@@ -34,7 +34,7 @@ class BinItem(Binnable[KeyType], Generic[KeyType, PayloadType]):
         return isinstance(self._payload, Binnable)
 
     def __str__(self) -> str:
-        return str(self._key) + ":" + str(self._payload)
+        return f"({self._key}): {self._payload}"
 
     @staticmethod
     def extract_from(extractor: Extractor[PayloadType, KeyType], items: Iterable[PayloadType]) \
