@@ -2,7 +2,7 @@ from typing import Generic, Iterator, Iterable
 
 from ._typing import KeyType, ItemType
 from ._Binnable import Binnable
-from ._BinKeyExtractor import BinKeyExtractor
+from ._Extractor import Extractor
 
 
 class BinItem(Binnable[KeyType], Generic[KeyType, ItemType]):
@@ -26,13 +26,13 @@ class BinItem(Binnable[KeyType], Generic[KeyType, ItemType]):
         return str(self._key) + ":" + str(self._payload)
 
     @staticmethod
-    def extract_from(extractor: BinKeyExtractor[ItemType, KeyType], items: Iterable[ItemType]) \
+    def extract_from(extractor: Extractor[ItemType, KeyType], items: Iterable[ItemType]) \
             -> Iterator['BinItem[KeyType, ItemType]']:
         """
         Extracts a bin-item from each given item using the given key-extractor.
 
-        :param extractor:   The extractor to ise to extract the bin key.
+        :param extractor:   The extractor to use to extract the bin key.
         :param items:       The items to create bin-items for.
         :return:            The bin-items.
         """
-        return (BinItem(extractor.extract_bin_key(item), item) for item in items)
+        return (BinItem(extractor.extract(item), item) for item in items)
