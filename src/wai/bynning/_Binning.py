@@ -47,29 +47,29 @@ class Binning(Generic[ItemType, LabelType]):
     @overload  # for when extractor == None, against_bins == False
     def rebin(self,
               binner: Binner[KeyType, NewLabelType],
-              extractor: None,
-              against_bins: bool) -> 'Binning[ItemType, NewLabelType]':
+              extractor: None = ...,
+              against_bins: bool = ...) -> 'Binning[ItemType, NewLabelType]':
         pass
 
     @overload  # for when extractor != None, against_bins == False
     def rebin(self,
               binner: Binner[NewKeyType, NewLabelType],
               extractor: Extractor[ItemType, NewKeyType],
-              against_bins: bool) -> 'Binning[ItemType, NewLabelType]':
+              against_bins: bool = ...) -> 'Binning[ItemType, NewLabelType]':
         pass
 
     @overload  # for when extractor == None, against_bins == True
     def rebin(self,
               binner: Binner[LabelType, NewLabelType],
-              extractor: None,
-              against_bins: bool) -> 'Binning[ItemType, NewLabelType]':
+              extractor: None = ...,
+              against_bins: bool = ...) -> 'Binning[ItemType, NewLabelType]':
         pass
 
     @overload  # for when extractor != None, against_bins == True
     def rebin(self,
               binner: Binner[NewKeyType, NewLabelType],
               extractor: Extractor[Bin[ItemType, LabelType], NewKeyType],
-              against_bins: bool) -> 'Binning[ItemType, NewLabelType]':
+              against_bins: bool = ...) -> 'Binning[ItemType, NewLabelType]':
         pass
 
     def rebin(self,
