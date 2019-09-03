@@ -6,10 +6,11 @@ from ..extract import Extractor
 
 class ArbitraryBinner(Binner[KeyType, LabelType]):
     """
-    Binner which bins items into arbitrary groups using an extractor.
+    Binner which bins items into arbitrary bins using an extractor
+    to specify the label.
     """
-    def __init__(self, group_extractor: Extractor[KeyType, LabelType]):
-        self.__group_extractor: Extractor[KeyType, LabelType] = group_extractor
+    def __init__(self, label_extractor: Extractor[KeyType, LabelType]):
+        self.__label_extractor: Extractor[KeyType, LabelType] = label_extractor
 
     def bin(self, item: Binnable[KeyType]) -> LabelType:
-        return self.__group_extractor.extract(item.get_bin_key())
+        return self.__label_extractor.extract(item.get_bin_key())
