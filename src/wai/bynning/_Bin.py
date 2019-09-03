@@ -4,13 +4,16 @@ from ._Binnable import Binnable
 from ._typing import LabelType, KeyType
 
 
-class Bin(Generic[LabelType, KeyType]):
+class Bin(Binnable[LabelType], Generic[LabelType, KeyType]):
     """
     Class representing a single bin of binnable items.
     """
     def __init__(self, label: LabelType, items: Optional[Iterable[Binnable[KeyType]]] = None):
         self.__label: LabelType = label
         self.__items: List[Binnable[KeyType]] = list(items) if items is not None else []
+
+    def get_bin_key(self) -> LabelType:
+        return self.label()
 
     def label(self) -> LabelType:
         """
