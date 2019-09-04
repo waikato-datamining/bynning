@@ -12,6 +12,7 @@ from ._NoBinner import NoBinner
 from ._RandomBinner import RandomBinner
 from ._RiceRuleBinner import RiceRuleBinner
 from ._ScottsNormalReferenceRuleBinner import ScottsNormalReferenceRuleBinner
+from ._ShuffleBinner import ShuffleBinner
 from ._SquareRootChoiceBinner import SquareRootChoiceBinner
 from ._StratifyingBinner import StratifyingBinner
 from ._SturgesFormulaBinner import SturgesFormulaBinner
