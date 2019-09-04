@@ -60,6 +60,18 @@ class Bin(Binnable[LabelType], Generic[ItemType, LabelType]):
         """
         self.__items.sort(key=Binnable.get_bin_key_static, reverse=reverse)
 
+    def layer(self) -> None:
+        """
+        Adds a layer to this bin, so the entire bin is treated as a single
+        item.
+        """
+        # Create a clone of ourselves
+        layer = Bin(self.__label)
+        layer.__items = self.__items
+
+        # Make the clone our only item
+        self.__items = [layer]
+
     def delayer(self) -> bool:
         """
         Removes one layer of wrapping from this bin.

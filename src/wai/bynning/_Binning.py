@@ -206,6 +206,13 @@ class Binning(Generic[ItemType, LabelType]):
         for bin in self:
             bin.sort(reverse)
 
+    def layer(self) -> None:
+        """
+        Adds a layer to this binning, treating each bin as its own item.
+        """
+        for bin in self:
+            bin.layer()
+
     def delayer(self) -> None:
         """
         Delayers each bin in this binning.
