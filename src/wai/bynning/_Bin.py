@@ -149,4 +149,5 @@ class Bin(Binnable[LabelType], Generic[ItemType, LabelType]):
         return False
 
     def __str__(self) -> str:
-        return f"{self.__label}: {', '.join(map(str, self))}"
+        indented_items: str = ',\n  '.join(map(str, self))
+        return f"{self.__label}:\n  {indented_items}"
