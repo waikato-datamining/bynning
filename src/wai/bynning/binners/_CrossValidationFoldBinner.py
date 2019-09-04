@@ -89,11 +89,17 @@ class CrossValidationFoldBinner(ConfiguredBinner[KeyType, str]):
             return CrossValidationFoldBinner.TRAIN_BIN_LABEL
 
     def __iter__(self):
+        # Reset to fold 0
         self.set_fold(0)
+
+        # Loop through all folds
         while True:
+            # Yield our current state at each iteration
             yield self
 
+            # If this is the last fold, finish
             if self.__fold == self._num_folds - 1:
                 return
 
+            # Move to the next fold
             self.set_fold(self.__fold + 1)
