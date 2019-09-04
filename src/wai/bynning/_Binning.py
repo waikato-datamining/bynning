@@ -212,3 +212,6 @@ class Binning(Generic[ItemType, LabelType]):
         """
         for bin in self:
             bin.delayer()
+
+    def __str__(self):
+        return '\n'.join(map(str, self))

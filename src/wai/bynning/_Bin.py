@@ -135,3 +135,6 @@ class Bin(Binnable[LabelType], Generic[ItemType, LabelType]):
                 return first.payload_is_binnable()
 
         return False
+
+    def __str__(self) -> str:
+        return f"{self.__label}: {', '.join(map(str, self))}"
