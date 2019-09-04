@@ -21,7 +21,7 @@ class ShuffleBinner(ConfiguredBinner[KeyType, int]):
 
     def _configure(self, items: Tuple[Binnable[KeyType], ...]):
         # Use the given RNG's shuffle if available, or the default if not
-        shuffle = self.__rand.shuffle if self.__rand is not None else default_shuffle
+        shuffle = self._rand.shuffle if self._rand is not None else default_shuffle
 
         # Create an ordered list of indices
         self.__ordering = list(range(len(items)))
