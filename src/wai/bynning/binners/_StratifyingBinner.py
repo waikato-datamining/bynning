@@ -7,7 +7,7 @@ class StratifyingBinner(Binner[KeyType, int]):
     """
     Binner which cyclically stratifies items over a number of bins.
     """
-    def __init__(self, num_folds: int = 10):
+    def __init__(self, num_folds: int):
         self._num_folds: int = num_folds
         self._next: int = 0
 
