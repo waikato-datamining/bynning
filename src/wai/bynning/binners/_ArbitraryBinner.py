@@ -1,7 +1,6 @@
-from .._Binnable import Binnable
 from ._Binner import Binner
-from .._typing import KeyType, LabelType
-from ..extract import Extractor
+from .._typing import KeyType, LabelType, ItemType
+from ..extraction import Extractor
 
 
 class ArbitraryBinner(Binner[KeyType, LabelType]):
@@ -10,7 +9,7 @@ class ArbitraryBinner(Binner[KeyType, LabelType]):
     to specify the label.
     """
     def __init__(self, label_extractor: Extractor[KeyType, LabelType]):
-        self.__label_extractor: Extractor[KeyType, LabelType] = label_extractor
+        self._label_extractor: Extractor[KeyType, LabelType] = label_extractor
 
-    def bin(self, item: Binnable[KeyType]) -> LabelType:
-        return self.__label_extractor.extract(item.get_bin_key())
+    def _bin(self, item: ItemType) -> LabelType:
+        return self._label_extractor.extract(item.bin_key)

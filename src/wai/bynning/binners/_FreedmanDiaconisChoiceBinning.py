@@ -1,5 +1,5 @@
 from numbers import Real
-from typing import Tuple
+from typing import List
 
 from wai.common.statistics import interquartile_range
 
@@ -14,12 +14,12 @@ class FreedmanDiaconisChoiceBinning(EqualWidthBinner):
     the standard deviation to outliers in data.
     """
     def __init__(self):
-        # Doesn't matter how many bins we set here as it is overridden
+        # Doesn't matter what bin width we set here as it is overridden
         # in _configure
         super().__init__(bin_width=1)
 
-    def _configure(self, items: Tuple[Binnable[Real], ...]):
-        iqr: Real = interquartile_range(map(Binnable.get_bin_key, items))
+    def _configure(self, items: List[Binnable[Real]]):
+        iqr: Real = interquartile_range(Binnable.map_bin_keys(items))
         self._bin_width = (2 * iqr) / (len(items) ** (1/3))
 
         super()._configure(items)

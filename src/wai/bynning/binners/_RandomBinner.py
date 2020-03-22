@@ -1,23 +1,23 @@
 from random import Random, randrange as default_randrange
-from typing import Optional
+from typing import Optional, Dict
 
-from .._Binnable import Binnable
-from .._typing import KeyType
+from ..extraction import Extractor, IdentityExtractor
+from .._typing import KeyType, LabelType
 from ._Binner import Binner
 
 
-class RandomBinner(Binner[KeyType, int]):
+class RandomBinner(Binner[KeyType, LabelType]):
     """
     Binner which bins items randomly into a set number of bins.
     """
     def __init__(self,
                  num_bins: int,
+                 label_extractor: Extractor[int, LabelType] = IdentityExtractor(),
                  rand: Optional[Random] = None):
-        self.__rand: Optional[Random] = rand
-        self.__num_bins: int = num_bins
+        self._num_bins: int = num_bins
+        self._labels: Dict[int, LabelType] = {index: label_extractor.extract(index)
+                                              for index in range(num_bins)}
+        self._randrange = rand.randrange if rand is not None else default_randrange
 
-    def bin(self, item: Binnable[KeyType]) -> int:
-        # Use the given random if available, or the default if not
-        randrange = self.__rand.randrange if self.__rand is not None else default_randrange
-
-        return randrange(self.__num_bins)
+    def _bin(self, key: KeyType) -> LabelType:
+        return self._labels[self._randrange(self._num_bins)]

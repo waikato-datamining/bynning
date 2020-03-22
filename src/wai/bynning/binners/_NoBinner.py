@@ -1,4 +1,3 @@
-from .._Binnable import Binnable
 from ._Binner import Binner
 from .._typing import KeyType, LabelType
 
@@ -9,7 +8,7 @@ class NoBinner(Binner[KeyType, LabelType]):
     items in a single bin with the given label.
     """
     def __init__(self, label: LabelType):
-        self.__label: LabelType = label
+        self._label: LabelType = label
 
-    def bin(self, item: Binnable[KeyType]) -> LabelType:
-        return self.__label
+    def _bin(self, key: KeyType) -> LabelType:
+        return self._label

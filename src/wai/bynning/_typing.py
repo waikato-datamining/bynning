@@ -5,7 +5,7 @@ ItemType = TypeVar("ItemType", bound="Binnable[KeyType]")
 
 # The type of the data used to determine the bin an object
 # goes into
-KeyType = TypeVar("KeyType")
+KeyType = TypeVar("KeyType", bound=Hashable)
 
 # The type of the bin labels (must be hashable as
 # is used to store bins in a map)

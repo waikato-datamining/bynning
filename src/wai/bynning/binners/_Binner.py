@@ -1,8 +1,9 @@
 from abc import abstractmethod
 from typing import Generic, Iterator, Iterable, Tuple
 
-from .._Binnable import Binnable
-from .._typing import KeyType, LabelType
+from .._Bin import Bin
+from .._Binning import Binning
+from .._typing import KeyType, LabelType, ItemType
 
 
 class Binner(Generic[KeyType, LabelType]):
@@ -10,22 +11,56 @@ class Binner(Generic[KeyType, LabelType]):
     Interface for classes which sort binnable items into bins via their
     bin-keys.
     """
-    @abstractmethod
-    def bin(self, item: Binnable[KeyType]) -> LabelType:
+    def _reset(self):
         """
-        Returns the bin label of the bin that the given
-        binnable item should go into.
+        Resets the binner between binnings.
+        """
+        pass
 
-        :param item:    The item to bin.
+    @abstractmethod
+    def _bin(self, key: KeyType) -> LabelType:
+        """
+        Returns the bin label of the bin that items with the given
+        bin-key should go into.
+
+        :param key:     The bin-key to bin.
         :return:        The bin label.
         """
         pass
 
-    def bin_all(self, items: Iterable[Binnable[KeyType]]) -> Iterator[Tuple[Binnable[KeyType], LabelType]]:
+    def _bin_item(self, item: ItemType) -> LabelType:
+        """
+        Returns the bin label of the bin that the given item
+        should go into.
+
+        :param item:    The item to bin.
+        :return:        The bin label.
+        """
+        return self._bin(item.bin_key)
+
+    def _bin_items(self, items: Iterable[ItemType]) -> Iterator[Tuple[LabelType, ItemType]]:
         """
         Returns the bin labels for all the given items.
 
         :param items:   The items to bin.
         :return:        An iterator over the items and their respective bin-labels.
         """
-        return ((item, self.bin(item)) for item in items)
+        # Reset the binner
+        self._reset()
+
+        return ((self._bin_item(item), item) for item in items)
+
+    def bin(self, items: Iterable[ItemType]) -> Binning[ItemType, LabelType]:
+        """
+        Creates a binning of the given items.
+
+        :param items:   The items.
+        :return:        The binning.
+        """
+        bins = {}
+        for label, item in self._bin_items(items):
+            if label not in bins:
+                bins[label] = Bin(label)
+            bins[label].add_item(item)
+
+        return Binning(bins.values())

@@ -1,10 +1,11 @@
-from typing import Generic, Iterator, Iterable, TypeVar, Union
+from typing import Generic, Iterator, Iterable, TypeVar
 
 from ._typing import KeyType
 from ._Binnable import Binnable
-from .extract import Extractor, ConstantExtractor
+from .extraction import Extractor
 
-PayloadType = TypeVar("PayloadType")  # The type of the payload of the bin-item (generally non-binnable)
+# The type of the payload of the bin-item (generally non-binnable)
+PayloadType = TypeVar("PayloadType")
 
 
 class BinItem(Binnable[KeyType], Generic[KeyType, PayloadType]):
@@ -13,19 +14,22 @@ class BinItem(Binnable[KeyType], Generic[KeyType, PayloadType]):
     of respecifying the bin-key of another binnable, by wrapping it in this class with
     an extractor.
     """
-    def __init__(self, key: KeyType, item: PayloadType):
-        self._key: KeyType = key
+    def __init__(self, bin_key: KeyType, item: PayloadType):
+        self._bin_key: KeyType = bin_key
         self._payload: PayloadType = item
 
-    def get_bin_key(self) -> KeyType:
-        return self._key
+    @property
+    def bin_key(self) -> KeyType:
+        return self._bin_key
 
+    @property
     def payload(self) -> PayloadType:
         """
         Gets the item that is the payload for this bin item.
         """
         return self._payload
 
+    @property
     def payload_is_binnable(self) -> bool:
         """
         Checks if the payload of this bin-item is binnable (i.e. this
@@ -34,10 +38,10 @@ class BinItem(Binnable[KeyType], Generic[KeyType, PayloadType]):
         return isinstance(self._payload, Binnable)
 
     def __str__(self) -> str:
-        return f"({self._key}): {self._payload}"
+        return f"({self._bin_key}): {self._payload}"
 
     @staticmethod
-    def extract_from(extractor: Union[KeyType, Extractor[PayloadType, KeyType]],
+    def extract_from(extractor: Extractor[PayloadType, KeyType],
                      items: Iterable[PayloadType]) -> Iterator['BinItem[KeyType, PayloadType]']:
         """
         Extracts a bin-item from each given item using the given key-extractor.
@@ -47,10 +51,6 @@ class BinItem(Binnable[KeyType], Generic[KeyType, PayloadType]):
         :param items:       The items to create bin-items for.
         :return:            The bin-items.
         """
-        # If the extractor is a constant, wrap it in a ConstantExtractor
-        if not isinstance(extractor, Extractor):
-            extractor = ConstantExtractor[PayloadType, KeyType](extractor)
-
         return (BinItem(extractor.extract(item), item) for item in items)
 
     @staticmethod
@@ -61,4 +61,4 @@ class BinItem(Binnable[KeyType], Generic[KeyType, PayloadType]):
 
         :param wrapped_iterator:    An iterator over bin-items.
         """
-        return map(BinItem.payload, wrapped_iterator)
+        return (item.payload for item in wrapped_iterator)

@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Generic
+from typing import Generic, Iterable, Iterator
 
 from ._typing import KeyType
 
@@ -8,8 +8,9 @@ class Binnable(Generic[KeyType]):
     """
     Interface for objects that can be sorted into bins.
     """
+    @property
     @abstractmethod
-    def get_bin_key(self) -> KeyType:
+    def bin_key(self) -> KeyType:
         """
         Gets the bin key to use to sort this binnable into
         a bin.
@@ -17,12 +18,21 @@ class Binnable(Generic[KeyType]):
         pass
 
     @staticmethod
-    def get_bin_key_static(binnable: 'Binnable[KeyType]') -> KeyType:
+    def map_bin_key(binnable: 'Binnable[KeyType]') -> KeyType:
         """
-        Static accessor of the binnable's get_bin_key method (for
-        sorting routines).
+        Maps a binnable to its bin key.
 
-        :param binnable:    The binnable to get the bin key from.
-        :return:            The bin key.
+        :param binnable:    The binnable.
+        :return:            Its bin-key.
         """
-        return binnable.get_bin_key()
+        return binnable.bin_key
+
+    @staticmethod
+    def map_bin_keys(binnables: Iterable['Binnable[KeyType]']) -> Iterator[KeyType]:
+        """
+        Maps a series of binnables to their bin-keys.
+
+        :param binnables:   The binnables.
+        :return:            An iterator over their bin-keys.
+        """
+        return (binnable.bin_key for binnable in binnables)

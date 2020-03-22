@@ -1,110 +1,65 @@
-from itertools import chain
-from typing import Generic, List, Union, Iterator, Iterable, Optional
+from typing import Generic, Iterator, List
 
-from ._BinItem import BinItem
 from ._Binnable import Binnable
 from ._typing import LabelType, KeyType, ItemType
 
 
-class Bin(Binnable[LabelType], Generic[ItemType, LabelType]):
+class Bin(Binnable[LabelType], Generic[LabelType, ItemType]):
     """
     Class representing a single bin of binnable items.
     """
-    def __init__(self, label: LabelType, items: Optional[Iterable[ItemType]] = None):
-        self.__label: LabelType = label
-        self.__items: List[ItemType] = list(items) if items is not None else []
+    def __init__(self, label: LabelType):
+        self._label: LabelType = label
+        self._items: List[ItemType] = []
 
-    def get_bin_key(self) -> LabelType:
+    def add_item(self, item: ItemType):
+        """
+        Adds a single item to the bin.
+
+        :param item:    The item.
+        """
+        self._items.append(item)
+
+    @property
+    def bin_key(self) -> LabelType:
         """
         Gets the bin-key for binning this bin, which is
         the label.
         """
-        return self.label()
+        return self.label
 
+    @property
     def label(self) -> LabelType:
         """
         Gets the label for this bin.
         """
-        return self.__label
+        return self._label
 
-    def add(self, item: ItemType):
-        """
-        Adds a single binnable item to this bin.
-
-        :param item:    The item to add.
-        """
-        self.__items.append(item)
-
-    def add_all(self, items: Iterable[ItemType]):
-        """
-        Adds a series of binnable items to this bin.
-
-        :param items:   The items to add.
-        """
-        for item in items:
-            self.__items.append(item)
-
-    def merge(self, other: 'Bin[ItemType, LabelType]'):
-        """
-        Adds all the items from another bin to this one.
-
-        :param other:   The bin to merge the items from.
-        """
-        self.add_all(other)
-
-    def sort(self, reverse: bool = False):
-        """
-        Sorts the items in this bin in place.
-
-        :param reverse:     Set to True to sort in descending order.
-        """
-        self.__items.sort(key=Binnable.get_bin_key_static, reverse=reverse)
-
-    def layer(self) -> None:
-        """
-        Adds a layer to this bin, so the entire bin is treated as a single
-        item.
-        """
-        # Create a clone of ourselves
-        layer = Bin(self.__label)
-        layer.__items = self.__items
-
-        # Make the clone our only item
-        self.__items = [layer]
-
-    def delayer(self) -> bool:
-        """
-        Removes one layer of wrapping from this bin.
-
-        :return:    Whether delayering was possible.
-        """
-        if self.items_are_bins():
-            self.__items = list(chain(*self))
-        elif self.items_are_wrapped():
-            self.__items = list(map(BinItem.payload, self))
-        else:
-            return False
-
-        return True
-
-    def __contains__(self, item: Union[ItemType, KeyType]) -> bool:
+    def __contains__(self, item: ItemType) -> bool:
         """
         Checks if a given item is in this bin.
 
-        :param item:    The item, or a bin-key.
-        :return:        True if the item (or an item with the given key) is in
-                        this bin, False if not.
+        :param item:    The item.
+        :return:        True if the item is in this bin,
+                        False if not.
         """
-        if isinstance(item, Binnable):
-            return item in self.__items
-        else:
-            return item in map(Binnable.get_bin_key_static, self.__items)
+        return item in self._items
+
+    def contains_key(self, key: KeyType) -> bool:
+        """
+        Checks if any item in the bin has the given bin-key.
+
+        :param key:     The bin-key.
+        :return:        True if an item in the bin has the given bin-key,
+                        False if not.
+        """
+        return any(item.bin_key == key for item in self._items)
 
     def __iter__(self) -> Iterator[ItemType]:
         """
         Returns an iterator over the items in this bin.
         """
-        return iter(self.__items)
+        return iter(self._items)
 
     def __getitem__(self, index: int) -> ItemType:
         """
@@ -113,41 +68,23 @@ class Bin(Binnable[LabelType], Generic[ItemType, LabelType]):
         :param index:   The positional index of the item to get.
         :return:        The item.
         """
-        return self.__items[index]
+        return self._items[index]
 
-    def get_items_by_key(self, key: KeyType) -> List[ItemType]:
+    def get_items_by_key(self, key: KeyType) -> Iterator[ItemType]:
         """
-        Gets the list of items in this bin that have
-        the given bin-key.
+        Gets the items in this bin that have the given bin-key.
 
         :param key:     The key to search for.
-        :return:        The list of items.
+        :return:        The items.
         """
-        return [item for item in self if item.get_bin_key() == key]
+        return (item for item in self._items if item.bin_key == key)
 
     def __len__(self) -> int:
         """
         Gets the number of items in this bin.
         """
-        return len(self.__items)
-
-    def items_are_bins(self) -> bool:
-        """
-        Whether the items in this bin are themselves bins.
-        """
-        return len(self) > 0 and isinstance(self.__items[0], Bin)
-
-    def items_are_wrapped(self) -> bool:
-        """
-        Whether the items in this bin are wrapped by the BinItem class.
-        """
-        if len(self) > 0:
-            first = self.__items[0]
-            if isinstance(first, BinItem):
-                return first.payload_is_binnable()
-
-        return False
+        return len(self._items)
 
     def __str__(self) -> str:
         indented_items: str = ',\n  '.join(map(str, self))
-        return f"{self.__label}:\n  {indented_items}"
+        return f"{self._label}:\n  {indented_items}"

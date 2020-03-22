@@ -1,54 +1,48 @@
-from typing import Tuple, List
+from typing import List
 
 from .._Binnable import Binnable
-from .._typing import LabelType
-from ._ConfiguredBinner import ConfiguredBinner
+from ._TwoPassBinner import TwoPassBinner
 
 
-class MinSizeBinner(ConfiguredBinner[int, int]):
+class MinSizeBinner(TwoPassBinner[int, int]):
     """
     Binner which bins items by their size, placing items in
     indexed bins until they exceed a certain minimum total
     size.
     """
     def __init__(self, min_size: int):
-        super().__init__()
+        # Minimum size must be positive
+        if min_size < 1:
+            raise ValueError(f"Min size of bins must be positive, got {min_size}")
 
         self.min_size: int = min_size
-        self._allocations: List[int] = []
-        self._allocation: int = 0
-        self._last_index: int = -1
 
-    def _configure(self, items: Tuple[Binnable[int], ...]):
-        # Allocate items to bins in order until full
-        current_size: int = 0
-        for index, item in enumerate(items):
-            # Keep track of the bin's size
-            current_size += item.get_bin_key()
+        self._bin_index: int = 0
+        self._remaining_size: int = 0
+        self._current_size: int = 0
 
-            # Move to the next bin once this one is full
-            if current_size >= self.min_size:
-                self._allocations.append(index + 1)
-                current_size = 0
+    def _configure(self, items: List[Binnable[int]]):
+        # Calculate the total size of all items
+        self._remaining_size = sum(Binnable.map_bin_keys(items))
 
-        # If we didn't fill up bin 0, there wasn't enough size available
-        if len(self._allocations) == 0:
-            raise ValueError(f"Not enough total size in given items to "
-                             f"meet minimum size requirement of {self.min_size}")
+        # Check there is enough size available
+        if self._remaining_size < self.min_size:
+            raise ValueError(f"Not enough total size in given items ({self._remaining_size}) "
+                             f"to meet minimum size requirement of {self.min_size}")
 
-        # If the current size of the last bin is too small, back allocate
-        # those items to the previous bin
-        if current_size != 0:
-            self._allocations.pop()
+    def _reset(self):
+        self._bin_index = 0
+        self._current_size = 0
 
-    def bin(self, item: Binnable[int]) -> LabelType:
-        # Keep a stateful enumeration of items
-        self._last_index += 1
+    def _bin(self, key: int) -> int:
+        # Move to the next bin if the current bin is full and
+        # we can guarantee to fill another bin
+        if self._current_size >= self.min_size and self._remaining_size >= self.min_size:
+            self._bin_index += 1
+            self._current_size = 0
 
-        # Move to the next allocation if we've filled the bin
-        if self._allocation < len(self._allocations):
-            if self._allocations[self._allocation] == self._last_index:
-                self._allocation += 1
+        # Update the sizes
+        self._current_size += key
+        self._remaining_size -= key
 
-        # Return the bin allocation for this item
-        return self._allocation
+        return self._bin_index
