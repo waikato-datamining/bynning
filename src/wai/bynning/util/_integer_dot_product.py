@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from .._Rational import Rational
+from wai.common.number import Rational
 
 
 def integer_dot_product(a: Tuple[int], b: Tuple[int]) -> Rational:

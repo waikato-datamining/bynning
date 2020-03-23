@@ -1,8 +1,9 @@
 from typing import Tuple, List
 
+from wai.common.number import Rational
+
 from ..extraction import Extractor, IdentityExtractor
 from ..util import integer_dot_product
-from .._Rational import Rational
 from .._typing import KeyType, LabelType
 from ._Binner import Binner
 
