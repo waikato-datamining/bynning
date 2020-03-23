@@ -53,7 +53,7 @@ setup(
     author='Corey Sterling',
     author_email='coreytsterling@gmail.com',
     install_requires=[
-        "wai.common"
+        "wai.common>=0.0.30"
     ],
     include_package_data=True
 )
