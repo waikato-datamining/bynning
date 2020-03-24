@@ -1,9 +1,8 @@
+from fractions import Fraction
 from typing import Tuple
 
-from wai.common.number import Rational
 
-
-def integer_dot_product(a: Tuple[int], b: Tuple[int]) -> Rational:
+def integer_dot_product(a: Tuple[int], b: Tuple[int]) -> Fraction:
     """
     Calculates the square of the dot-product between to vectors
     of integers.
@@ -17,7 +16,7 @@ def integer_dot_product(a: Tuple[int], b: Tuple[int]) -> Rational:
         raise ValueError(f"Can't perform integer dot product between vectors of different "
                          f"lengths: {a}, {b}")
 
-    return Rational(
+    return Fraction(
         sum(a_i * b_i for a_i, b_i in zip(a, b)) ** 2,
         sum(a_i ** 2 for a_i in a) * sum(b_i ** 2 for b_i in b)
     )

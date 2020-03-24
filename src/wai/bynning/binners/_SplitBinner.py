@@ -1,6 +1,5 @@
+from fractions import Fraction
 from typing import Tuple, List
-
-from wai.common.number import Rational
 
 from ..extraction import Extractor, IdentityExtractor
 from ..util import integer_dot_product
@@ -70,7 +69,7 @@ class SplitBinner(Binner[KeyType, LabelType]):
 
             # Calculate the integer dot-product of each candidate ratio
             # to determine which is closest to the desired ratio
-            candidate_dps: Tuple[Rational, ...] = tuple(
+            candidate_dps: Tuple[Fraction, ...] = tuple(
                 integer_dot_product(ratios, candidate_ratio)
                 for candidate_ratio in candidate_ratios
             )
