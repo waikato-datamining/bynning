@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.0.2 (2020-03-23)
+0.0.2 (2020-??-??)
 -------------------
 
 - Added ability to randomise a split.
