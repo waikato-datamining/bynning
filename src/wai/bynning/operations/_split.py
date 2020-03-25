@@ -1,4 +1,7 @@
-from typing import Iterable, TypeVar, Dict, Iterator
+from random import Random
+from typing import Iterable, TypeVar, Dict, Iterator, Optional
+
+from wai.common.iterate import random
 
 from ..binners import SplitBinner
 from ..extraction import LabelExtractor, IndexExtractor
@@ -7,12 +10,13 @@ from .._BinItem import BinItem
 T = TypeVar("T")
 
 
-def split(items: Iterable[T], **ratios: int) -> Dict[str, Iterator[T]]:
+def split(items: Iterable[T], rand: Optional[Random] = None, **ratios: int) -> Dict[str, Iterator[T]]:
     """
     Splits the items into categories, with a certain proportion of
     the items going into each category.
 
     :param items:       The items to split.
+    :param rand:        Optional RNG to randomise the split.
     :param ratios:      The category proportions, keyed by category name.
     :return:            A dictionary of category name to an iterator of the
                         items in that category.
@@ -27,6 +31,10 @@ def split(items: Iterable[T], **ratios: int) -> Dict[str, Iterator[T]]:
 
     # Wrap the items in a bin-item
     bin_items: Iterator[BinItem[int, T]] = BinItem[int, T].extract_from(IndexExtractor[T](), items)
+
+    # Optionally randomise the item order
+    if rand is not None:
+        bin_items = random(bin_items, rand)
 
     # Use the split-binner to perform the split, with a labeller
     binning = SplitBinner[int, str](*ratio_list, label_extractor=LabelExtractor[str](*label_list)).bin(bin_items)
